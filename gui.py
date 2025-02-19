@@ -5,7 +5,54 @@ import time
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def gui():
+    theme = 3
+    def open_settings():
+        def change_theme():
+            global theme
+            if theme >5:
+                theme +=1
+            else:
+                theme = 0
+        # Create an overlay frame
+        settings_frame = tk.Frame(window, bg="white", padx=10, pady=10, relief="raised", borderwidth=2)
+        settings_frame.place(relx=0.5, rely=0.5, anchor="center")  # Center the frame
 
+        # Header
+        header = tk.Label(settings_frame, font=("Arial", 25), text="Settings", bg="white")
+        header.pack()
+
+        # General Settings
+        genlabel = tk.Label(settings_frame, text="General", font=("Arial", 15), pady=10, bg="white")
+        genlabel.pack()
+
+        button_frame = tk.Frame(settings_frame, bg="white")
+        button_frame.pack()
+
+        themeselector = tk.Button(button_frame, text="Pink", width=10, command=change_theme)
+        fontsize_button = tk.Button(button_frame, text="Medium", width=10)
+        
+        themeselector.pack(side="left", padx=5)
+        fontsize_button.pack(side="left", padx=5)
+
+        # Server Settings
+        servlabel = tk.Label(settings_frame, text="Server", font=("Arial", 15), pady=15, bg="white")
+        servlabel.pack()
+
+        cooldownlabel = tk.Label(settings_frame, text="Message Cooldown (Seconds)", bg="white")
+        cooldownlabel.pack()
+        
+        cooldowntime = tk.Scale(settings_frame, from_=0, to=60, orient="horizontal", length=150)
+        cooldowntime.pack()
+
+        maxlabel = tk.Label(settings_frame, text="Max Users", bg="white")
+        maxlabel.pack()
+
+        maxusers = tk.Scale(settings_frame, from_=2, to=10, orient="horizontal", length=150)
+        maxusers.pack()
+
+        # Close Button
+        close_button = tk.Button(settings_frame, text="Close", command=settings_frame.destroy)
+        close_button.pack(pady=10)
     def messagehandler():
         print("Handler Online")
         while True:
@@ -13,7 +60,8 @@ def gui():
             if not response:
                 break
             chatoutput.config(state="normal")
-            chatoutput.insert("end", f"{response}\n")
+            chatoutput.insert("end", f"\n{response}")
+            chatoutput.see("end")
             chatoutput.config(state="disabled")
 
     handler = threading.Thread(target=messagehandler)
@@ -37,12 +85,45 @@ def gui():
         msg = messageentery.get()
         outgoing = f"{name}: {msg}"
         client.send(outgoing.encode())
+    
+
 
     # COLORS!!!
-    primary = '#212434'
-    accent = '#3F446F'
-    text = '#BBBBBB'
-    font = 'Arial'
+    if theme == 0:
+        primary = '#212434'
+        accent = '#3F446F'
+        text = '#FCF483'
+        font = 'Arial'
+        accent2 = '#FCF483'
+        text2 = '#000000'
+    if theme == 1:
+        primary = '#212434'
+        accent = '#3F446F'
+        text = '#FCF483'
+        font = 'Arial'
+        accent2 = '#FCF483'
+        text2 = '#000000'
+    if theme == 2:
+        primary = '#212434'
+        accent = '#3F446F'
+        text = '#FCF483'
+        font = 'Arial'
+        accent2 = '#FCF483'
+        text2 = '#000000'
+    if theme == 3:
+        primary = '#FFB5BB'
+        accent = '#FEEEEC'
+        text = '#FD7094'
+        font = 'Arial'
+        accent2 = '#FEEDF5'
+        text2 = '#000000'
+    if theme == 4:
+        primary = '#000000'
+        accent = '#000000'
+        text = '#39FF14'
+        font = 'Arial'
+        accent2 = '#39FE14'
+        text2 = '#000000'
 
     window = tk.Tk()
     window.resizable(False, False)
@@ -53,7 +134,7 @@ def gui():
     title = tk.Label(
         text="Chat Room",
         bg=primary,
-        fg=text,
+        fg=accent2,
         font=(font, 25) 
         )
     namelabel = tk.Label(
@@ -88,7 +169,9 @@ def gui():
         )
     submit = tk.Button( 
         text="Connect", 
-        command=submit
+        command=submit,
+        bg=accent2,
+        fg=text2
         )
     output = tk.Label( 
         text="",
@@ -102,7 +185,9 @@ def gui():
     )
     sendbutton = tk.Button(
         text="Send",
-        command=sendmessage
+        command=sendmessage,
+        bg=accent2,
+        fg=text2
     )
     chatoutput = tk.Text(
         state="disabled",
@@ -111,7 +196,10 @@ def gui():
         fg=text,
         width=50
     )
-
+    settings = tk.Button(
+        text="Settings",
+        command=open_settings
+    )
 
     title.pack()
     namelabel.pack()
@@ -124,6 +212,7 @@ def gui():
     output.pack()
     messageentery.pack()
     sendbutton.pack()
+    settings.pack()
     chatoutput.pack()
     window.mainloop()
 

@@ -5,7 +5,10 @@ import time
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def gui():
+    global messageready
+    global theme
     theme = 3
+    messageready = True
     def open_settings():
         def change_theme():
             global theme
@@ -13,46 +16,111 @@ def gui():
                 theme +=1
             else:
                 theme = 0
-        # Create an overlay frame
-        settings_frame = tk.Frame(window, bg="white", padx=10, pady=10, relief="raised", borderwidth=2)
+
+        settings_frame = tk.Frame(window, bg=primary, padx=10, pady=10, relief="raised", borderwidth=2)
         settings_frame.place(relx=0.5, rely=0.5, anchor="center")  # Center the frame
 
-        # Header
-        header = tk.Label(settings_frame, font=("Arial", 25), text="Settings", bg="white")
-        header.pack()
+        header = tk.Label(
+            settings_frame,
+            font=("Arial", 25),
+            text="Settings",
+            bg=primary,
+            fg=accent2
+            )
+        genlabel = tk.Label(
+            settings_frame,
+            text="General",
+            font=("Arial", 15),
+            pady=10,
+            bg=primary,
+            fg=text
+            )
+        button_frame = tk.Frame(
+            settings_frame, 
+            bg=primary,
+            )
 
-        # General Settings
-        genlabel = tk.Label(settings_frame, text="General", font=("Arial", 15), pady=10, bg="white")
-        genlabel.pack()
-
-        button_frame = tk.Frame(settings_frame, bg="white")
-        button_frame.pack()
-
-        themeselector = tk.Button(button_frame, text="Pink", width=10, command=change_theme)
-        fontsize_button = tk.Button(button_frame, text="Medium", width=10)
+        themeselector = tk.Button(
+            button_frame, 
+            text="Pink", 
+            width=10, 
+            command=change_theme,
+            bg=accent2,
+            fg=text2
+            )
+        fontsize_button = tk.Button(
+            button_frame, 
+            text="Medium", 
+            width=10,
+            bg=accent2,
+            fg=text2
+            )
+        maxlabel = tk.Label(
+            settings_frame, 
+            text="Max Users", 
+            bg=primary,
+            fg=text
+            )
+        maxusers = tk.Scale(
+            settings_frame, 
+            from_=2, 
+            to=10, 
+            orient="horizontal", 
+            length=150,
+            bg=primary,
+            fg=text2,
+            highlightthickness=0,
+            )
+        cooldowntime = tk.Scale(
+            settings_frame,
+            from_=0, 
+            to=60,
+            orient="horizontal",
+            length=150,
+            bg=primary,
+            fg=text2,
+            highlightthickness=0
+            )
+        servlabel = tk.Label(
+            settings_frame,
+            text="Server",
+            font=("Arial", 15),
+            pady=15,
+            bg=primary,
+            fg=text
+            )
+        cooldownlabel = tk.Label(
+            settings_frame,
+            text="Message Cooldown (Seconds)",
+            bg=primary,
+            fg=text
+            )
+        close_button = tk.Button(
+            settings_frame,
+            text="Close",
+            command=settings_frame.destroy,
+            bg=accent2,
+            fg=text2
+            )
         
+
+        header.pack()
+        genlabel.pack()
         themeselector.pack(side="left", padx=5)
         fontsize_button.pack(side="left", padx=5)
-
-        # Server Settings
-        servlabel = tk.Label(settings_frame, text="Server", font=("Arial", 15), pady=15, bg="white")
+        button_frame.pack()
         servlabel.pack()
-
-        cooldownlabel = tk.Label(settings_frame, text="Message Cooldown (Seconds)", bg="white")
         cooldownlabel.pack()
-        
-        cooldowntime = tk.Scale(settings_frame, from_=0, to=60, orient="horizontal", length=150)
         cooldowntime.pack()
-
-        maxlabel = tk.Label(settings_frame, text="Max Users", bg="white")
         maxlabel.pack()
-
-        maxusers = tk.Scale(settings_frame, from_=2, to=10, orient="horizontal", length=150)
         maxusers.pack()
+        close_button.pack(pady=10)
+
+        
+
+
 
         # Close Button
-        close_button = tk.Button(settings_frame, text="Close", command=settings_frame.destroy)
-        close_button.pack(pady=10)
     def messagehandler():
         print("Handler Online")
         while True:
@@ -63,7 +131,10 @@ def gui():
             chatoutput.insert("end", f"\n{response}")
             chatoutput.see("end")
             chatoutput.config(state="disabled")
+    def cooldown():
+        time.sleep(cooldowntime.get())
 
+    cooldown = threading.Thread(target=cooldown)
     handler = threading.Thread(target=messagehandler)
     def submit():
         if len(nameentry.get()) > 20:
@@ -87,7 +158,12 @@ def gui():
         client.send(outgoing.encode())
     
 
-
+    global primary
+    global accent
+    global text
+    global font
+    global accent2
+    global text2
     # COLORS!!!
     if theme == 0:
         primary = '#212434'
@@ -198,7 +274,9 @@ def gui():
     )
     settings = tk.Button(
         text="Settings",
-        command=open_settings
+        command=open_settings,
+        bg=accent2,
+        fg=text2
     )
 
     title.pack()

@@ -19,8 +19,8 @@ while True:
     msg = client.recv(1024).decode()
     if not msg:
         break
-    print(msg)
-    client.send(f"Message Sent!".encode())
+    print(f"Received: {msg}")
+    client.send(msg.encode())
 
 client.close()
 server.close()

@@ -1,6 +1,7 @@
 import socket
 import threading
 
+clients = []
 # Function to handle each client connection
 def handle_client(client_socket, addr):
     print(f"New connection from {addr}")
@@ -10,11 +11,19 @@ def handle_client(client_socket, addr):
             if not msg:
                 break  # Client disconnected
             print(f"Received from {addr}: {msg}")
-            client_socket.send(msg.encode())  # Echo back the message
+            broadcast(msg, client_socket)
+            
         except ConnectionResetError:
             break  # Handle client disconnection
     print(f"Connection closed for {addr}")
     client_socket.close()
+
+def broadcast(message, sender_socket):
+    for client in clients:
+        try:
+            client.send(message.encode())
+        except:
+            clients.remove(client)  # Remove dead connections
 
 hostname = socket.gethostname()
 host = socket.gethostbyname(hostname)

@@ -1,39 +1,46 @@
 import socket
 import threading
 
-clients = []
+clients = []  # List to store all connected clients
+
 # Function to handle each client connection
 def handle_client(client_socket, addr):
     print(f"New connection from {addr}")
+    clients.append(client_socket)  # Add client to list
+
     while True:
         try:
             msg = client_socket.recv(1024).decode()
             if not msg:
                 break  # Client disconnected
+
             print(f"Received from {addr}: {msg}")
-            broadcast(msg, client_socket)
-            
+
+            # Send the received message to ALL connected clients (including the sender)
+            broadcast(msg)
+
         except ConnectionResetError:
             break  # Handle client disconnection
+
     print(f"Connection closed for {addr}")
+    clients.remove(client_socket)  # Remove client from list when disconnected
     client_socket.close()
 
-def broadcast(message, sender_socket):
+# Function to broadcast message to all connected clients
+def broadcast(message):
     for client in clients:
         try:
             client.send(message.encode())
         except:
-            clients.remove(client)  # Remove dead connections
+            clients.remove(client)  # Remove any dead connections
 
 hostname = socket.gethostname()
 host = socket.gethostbyname(hostname)
 
 # Server setup
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = host  # Listen on all network interfaces
-port = int(input("Input port: "))
+port = int(input("Input port: "))  # User inputs port number
 
-# Bind and listen
 server.bind((host, port))
 server.listen(5)  # Allows up to 5 pending connections
 print(f"Server listening on {host}:{port}")
@@ -43,6 +50,3 @@ while True:
     client, addr = server.accept()
     client_thread = threading.Thread(target=handle_client, args=(client, addr))
     client_thread.start()
-
-# Close server (This will never reach due to infinite loop)
-server.close()

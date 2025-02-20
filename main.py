@@ -138,7 +138,7 @@ class Connect(tk.Frame):
         )
         def connect(ip, port, name):
             def openmain():
-                window = tk.Toplevel()  # ✅ Correct: Create a new window
+                window = tk.Toplevel()  creates a new window
                 window.title("Chat Room")
 
                 def messagehandler():

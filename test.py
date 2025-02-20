@@ -1,5 +1,5 @@
 import tkinter as tk
-
+from tkinter import ttk
 class PageSwitcher(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -41,9 +41,33 @@ class PageOne(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-
-        tk.Label(self, text="Page One", font=("Arial", 16)).pack(pady=20)
-        tk.Button(self, text="Back to Start", command=lambda: controller.show_frame("StartPage")).pack()
+        roomname = tk.Label(
+            text=f"Un-Named Room",
+            font=("Arial", 25)
+        )
+        output = tk.Text(
+            self,
+            bg="#EEEEEE"
+            )
+        roominfo = tk.Label(
+            text=f"Connected to localhost on port 5000"
+        )
+        entry = tk.Text(
+            self,
+            bg="#EEEEEE",
+            height=3
+        )
+        send = tk.Button(
+            text=">",
+            font=("Arial", 20),
+            width=8,
+            height=1
+        )
+        roomname.pack()
+        roominfo.pack()
+        output.pack(expand=True, fill="both", padx=20,pady=10)
+        entry.pack(expand=True, fill="x", padx=20, pady=10, side="left")
+        send.pack(side="left", padx=10)
 
 class PageTwo(tk.Frame):
     def __init__(self, parent, controller):

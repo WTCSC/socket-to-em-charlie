@@ -131,8 +131,6 @@ def gui():
             chatoutput.insert("end", f"\n{response}")
             chatoutput.see("end")
             chatoutput.config(state="disabled")
-    def cooldown():
-        time.sleep(cooldowntime.get())
 
     cooldown = threading.Thread(target=cooldown)
     handler = threading.Thread(target=messagehandler)

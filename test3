@@ -4,6 +4,8 @@ from tkinter import ttk
 import socket
 import threading
 import time
+import psutil
+from tkinter import StringVar
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
  
 LARGEFONT =("Verdana", 35)
@@ -151,13 +153,16 @@ class Connect(tk.Frame):
                         response = client.recv(1024).decode()
                         if not response:
                             break
-                        chatoutput.config(state="normal")
-                        chatoutput.insert("end", f"\n{response}")
-                        chatoutput.see("end")
-                        chatoutput.config(state="disabled")
+                        if response[:8] == "ROOMNAME":
+                            roomname.config(text=response[9:])
+                        else:
+                            chatoutput.config(state="normal")
+                            chatoutput.insert("end", f"\n{response}")
+                            chatoutput.see("end")
+                            chatoutput.config(state="disabled")
 
                 def sendmessage():
-                    name = nameentry.get()  # Placeholder, replace with nameentry.get()
+                    name = nameentry.get()
                     msg = messageentry.get("1.0", "end")
                     outgoing = f"{name}: {msg}"
                     client.send(outgoing.encode())
@@ -200,6 +205,7 @@ class Connect(tk.Frame):
                 send.pack(side="left", padx=10)
 
                 # Post Connection Updates
+                client.send("NEWUSERCONNECT".encode())
                 client.send(f"{nameentry.get()} has joined\n".encode())
                 roominfo.config(text=f"Connected to {ip} on port {port}")
 
@@ -234,45 +240,76 @@ class Connect(tk.Frame):
         connectbutton.pack(pady=30)
         errorlabel.pack()
         returnbutton.pack()
-     
-class Host(tk.Frame): 
+
+class Host(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+
+        # Function to get available network adapters
+        def get_ip_addresses():
+            ip_addresses = {}
+            for interface, addrs in psutil.net_if_addrs().items():
+                for addr in addrs:
+                    if addr.family == socket.AF_INET:  # IPv4 addresses only
+                        ip_addresses[interface] = addr.address
+            return ip_addresses
+
+        ip_addresses = get_ip_addresses()
+        iplist = ["Select Adapter"] + [f"{interface}: {ip}" for interface, ip in ip_addresses.items()]
+        ipaddrlist = [ip for interface, ip in ip_addresses.items()]
+
+
         title = tk.Label(
             self,
             font=("Arial", 25),
             text="Chat Room Maker",
             pady=20
         )
+
         returnbutton = tk.Button(
             self,
-            text ="Return",
-            command = lambda : controller.show_frame(StartPage)
+            text="Return",
+            command=lambda: controller.show_frame(StartPage)
         )
+
         namelabel = tk.Label(
             self,
             text="Room Name"
         )
+
         nameentry = tk.Entry(
             self,
             width=35
         )
+
         portlabel = tk.Label(
             self,
             text="Port",
         )
+
         portentry = tk.Entry(
             self,
             width=15
         )
+
+        # ✅ Correct Dropdown Implementation
+        adapter_var = tk.StringVar(self)  # Create a variable for selection
+        adapter_var.set("Select Adapter")  # Set default text
+
+        ipselector = tk.OptionMenu(
+            self, adapter_var, *iplist
+        )
+        ipselector.config(width=20)  # Adjust dropdown width
+
         hostbutton = tk.Button(
             self,
             height=3,
             width=20,
             text="Host",
-            command= lambda : hosting(nameentry.get(), portentry.get())
+            command=lambda: hosting(nameentry.get(), portentry.get())
         )
+
         errorlabel = tk.Label(
             self,
             fg="Red",
@@ -282,24 +319,24 @@ class Host(tk.Frame):
             server_thread = threading.Thread(target=startserver, args=(roomname, port), daemon=True)
             server_thread.start()  # ✅ Runs in a separate thread so UI doesn't freeze
 
-        def startserver(roomname, port):
+        def startserver(theroomname, port):
             clients = []  # List to store all connected clients
-
             # Function to handle each client connection
             def handle_client(client_socket, addr):
                 print(f"New connection from {addr}")
                 clients.append(client_socket)  # Add client to list
-
                 while True:
                     try:
                         msg = client_socket.recv(1024).decode()
                         if not msg:
                             break  # Client disconnected
+                        if msg == "NEWUSERCONNECT":
+                            client_socket.send(f"ROOMNAME:{theroomname}".encode())
+                        else:
+                            print(f"Received from {addr}: {msg}")
 
-                        print(f"Received from {addr}: {msg}")
-
-                        # Send the received message to ALL connected clients (including the sender)
-                        broadcast(msg)
+                            # Send the received message to ALL connected clients (including the sender)
+                            broadcast(msg)
 
                     except ConnectionResetError:
                         break  # Handle client disconnection
@@ -317,7 +354,7 @@ class Host(tk.Frame):
                         clients.remove(client)  # Remove any dead connections
 
             hostname = socket.gethostname()
-            host = socket.gethostbyname(hostname)
+            host = ipaddrlist[iplist.index(adapter_var.get())-1]
 
             # Server setup
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -332,12 +369,14 @@ class Host(tk.Frame):
                 client, addr = server.accept()
                 client_thread = threading.Thread(target=handle_client, args=(client, addr))
                 client_thread.start()
+                
 
         title.pack()
         namelabel.pack(pady = 5)
         nameentry.pack(pady = 5)
         portlabel.pack(pady = 5)
         portentry.pack(pady = 5)
+        ipselector.pack(pady=10)  # ✅ Correctly placed dropdown menu
         hostbutton.pack(pady=30)
         errorlabel.pack()
         returnbutton.pack()

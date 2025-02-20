@@ -290,7 +290,6 @@ class Host(tk.Frame):
             width=15
         )
 
-        # ✅ Correct Dropdown Implementation
         adapter_var = tk.StringVar(self)  # Create a variable for selection
         adapter_var.set("Select Adapter")  # Set default text
 
@@ -315,6 +314,39 @@ class Host(tk.Frame):
         def hosting(roomname, port):
             server_thread = threading.Thread(target=startserver, args=(roomname, port), daemon=True)
             server_thread.start()  # ✅ Runs in a separate thread so UI doesn't freeze
+            servinfo = tk.Toplevel()  # ✅ Correct: Create a new window
+            servinfo.title("Server Info")
+            servinfo.geometry("350x250")
+            titlelabel = tk.Label(
+                servinfo,
+                text="Hosting Server...",
+                font=("Arial", 15)
+            )
+            roomnametitle = tk.Label(
+                servinfo,
+                text=f"Room Name: {roomname}",
+                font=("Arial", 12)
+            )
+            ipaddrlabel = tk.Label(
+                servinfo,
+                text=f"IP Address: {ipaddrlist[iplist.index(adapter_var.get())-1]}",
+                font=("Arial", 12)
+            )
+            portlabel = tk.Label(
+                servinfo,
+                text=f"Port: {port}",
+                font=("Arial", 12)
+            )
+            passwordlabel = tk.Label(
+                servinfo,
+                text="ERROR: This feature is incomplete",
+                font=("Arial", 12)
+            )
+            titlelabel.pack(pady=5)
+            roomnametitle.pack(pady=5)
+            ipaddrlabel.pack(pady=5)
+            portlabel.pack(pady=5)
+            passwordlabel.pack(pady=5)
 
         def startserver(theroomname, port):
             clients = []  # List to store all connected clients

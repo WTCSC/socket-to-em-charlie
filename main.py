@@ -142,7 +142,6 @@ class Connect(tk.Frame):
                 window.title("Chat Room")
 
                 def messagehandler():
-                    print("Handler Online")
                     while True:
                         response = client.recv(1024).decode()
                         if not response:
@@ -390,7 +389,6 @@ class Host(tk.Frame):
 
             server.bind((host, port))
             server.listen(5)  # Allows up to 5 pending connections
-            print(f"Server listening on {host}:{port}")
 
             # Accept multiple clients
             while True:

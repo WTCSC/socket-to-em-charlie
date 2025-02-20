@@ -11,9 +11,6 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 LARGEFONT =("Verdana", 35)
 theme = "Pink"
 
-
-
-
 class tkinterApp(tk.Tk):
 
     # __init__ function for class tkinterApp 

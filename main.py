@@ -1,14 +1,11 @@
 
 import tkinter as tk
-from tkinter import ttk
 import socket
 import threading
 import time
 import psutil
-from tkinter import StringVar
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
  
-LARGEFONT =("Verdana", 35)
 theme = "Pink"
 
 class tkinterApp(tk.Tk):
@@ -313,8 +310,10 @@ class Host(tk.Frame):
         )
         def hosting(roomname, port):
             server_thread = threading.Thread(target=startserver, args=(roomname, port), daemon=True)
-            server_thread.start()  # ✅ Runs in a separate thread so UI doesn't freeze
-            servinfo = tk.Toplevel()  # ✅ Correct: Create a new window
+            server_thread.start()  # Runs in a separate thread so UI doesn't freeze
+            servinfo = tk.Toplevel() # Creatse a new window for the server info
+
+            # GUI Widgets and setup
             servinfo.title("Server Info")
             servinfo.geometry("350x250")
             titlelabel = tk.Label(
@@ -405,7 +404,7 @@ class Host(tk.Frame):
         nameentry.pack(pady = 5)
         portlabel.pack(pady = 5)
         portentry.pack(pady = 5)
-        ipselector.pack(pady=10)  # ✅ Correctly placed dropdown menu
+        ipselector.pack(pady=10)
         hostbutton.pack(pady=30)
         errorlabel.pack()
         returnbutton.pack()

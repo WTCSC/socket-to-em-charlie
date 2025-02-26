@@ -81,7 +81,7 @@ class StartPage(tk.Frame):
         title.pack()
         connectbutton.pack(pady=40)
         hostbutton.pack()
-        themebutton.pack(pady=10)
+        #themebutton.pack(pady=10)# Theme button (Feature not complete)
 
      
 # second window frame page1 
@@ -124,6 +124,13 @@ class Connect(tk.Frame):
             self,
             width=15
         )
+        passwordlabel = tk.Label(
+            self,
+            text="Passwrod"
+        )
+        passwordentry = tk.Entry(
+            self,
+        )
         connectbutton = tk.Button(
             self,
             height=3,
@@ -138,7 +145,7 @@ class Connect(tk.Frame):
         )
         def connect(ip, port, name):
             def openmain():
-                window = tk.Toplevel()  creates a new window
+                window = tk.Toplevel()  # creates a new window
                 window.title("Chat Room")
 
                 def messagehandler():
@@ -163,7 +170,7 @@ class Connect(tk.Frame):
 
                 handler = threading.Thread(target=messagehandler, daemon=True)
                 handler.start()
-
+                password = passwordentry.get()
                 roomname = tk.Label(
                     window,
                     text="Un-Named Room",
@@ -198,7 +205,7 @@ class Connect(tk.Frame):
                 send.pack(side="left", padx=10)
 
                 # Post Connection Updates
-                client.send("NEWUSERCONNECT".encode())
+                client.send(f"&/{password}".encode())
                 client.send(f"{nameentry.get()} has joined\n".encode())
                 roominfo.config(text=f"Connected to {ip} on port {port}")
 
@@ -213,16 +220,15 @@ class Connect(tk.Frame):
 
                 window.protocol("WM_DELETE_WINDOW", on_close)  # Bind the close event
 
-            if 1024 <= int(port) <= 65535:
-                if 7 <= len(ip) <= 15:
-                    if 3<= len(name) <= 20:
-                        client.connect((ip, int(port)))
-                        time.sleep(1)
-                        openmain()
-                        portentry.delete(0, 'end')
-                        ipentry.delete(0, 'end')
+            if 1024 <= int(port) <= 65535 and 7 <= len(ip) <= 15 and 3 <= len(name) <= 20 and name[:2] != "&/": # Checks if the port number is valid, IP is within the right length and makes sure the name is a reasonable length and doesnt start with &/
+                            client.connect((ip, int(port)))
+                            time.sleep(1)
+                            openmain()
+                            portentry.delete(0, 'end') # Clean out the entry boxes
+                            ipentry.delete(0, 'end')
+                            passwordentry.delete(0, 'end')
             else:
-                errorlabel.config(text="ERROR: Invalid input")
+                errorlabel.config(text="ERROR: Invalid Input")
         title.pack()
         namelabel.pack(pady = 5)
         nameentry.pack(pady = 5)
@@ -230,7 +236,9 @@ class Connect(tk.Frame):
         ipentry.pack(pady = 5)
         portlabel.pack(pady = 5)
         portentry.pack(pady = 5)
-        connectbutton.pack(pady=30)
+        passwordlabel.pack()
+        passwordentry.pack()
+        connectbutton.pack()
         errorlabel.pack()
         returnbutton.pack()
 
@@ -293,7 +301,13 @@ class Host(tk.Frame):
             self, adapter_var, *iplist
         )
         ipselector.config(width=20)  # Adjust dropdown width
-
+        passwordlabel = tk.Label(
+            self,
+            text="Password",
+        )
+        passwordentry = tk.Entry(
+            self,
+        )
         hostbutton = tk.Button(
             self,
             height=3,
@@ -337,7 +351,7 @@ class Host(tk.Frame):
             )
             passwordlabel = tk.Label(
                 servinfo,
-                text="ERROR: This feature is incomplete",
+                text=f"Password: {passwordentry.get()}",
                 font=("Arial", 12)
             )
             titlelabel.pack(pady=5)
@@ -357,14 +371,17 @@ class Host(tk.Frame):
                         msg = client_socket.recv(1024).decode()
                         if not msg:
                             break  # Client disconnected
-                        if msg == "NEWUSERCONNECT":
-                            client_socket.send(f"ROOMNAME:{theroomname}".encode())
+                        if msg[:2] == "&/":  # Checks if the message starts with these two characters to determine if its a configuration message
+                            if msg[2:] == password:
+                                client_socket.send(f"ROOMNAME:{theroomname}".encode())
+                            else:
+                                client_socket.close()
                         else:
                             print(f"Received from {addr}: {msg}")
 
                             # Send the received message to ALL connected clients (including the sender)
                             broadcast(msg)
-
+                            print(clients)
                     except ConnectionResetError:
                         break  # Handle client disconnection
 
@@ -382,6 +399,7 @@ class Host(tk.Frame):
 
             hostname = socket.gethostname()
             host = ipaddrlist[iplist.index(adapter_var.get())-1]
+            password = passwordentry.get()
 
             # Server setup
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -402,8 +420,10 @@ class Host(tk.Frame):
         nameentry.pack(pady = 5)
         portlabel.pack(pady = 5)
         portentry.pack(pady = 5)
+        passwordlabel.pack()
+        passwordentry.pack()
         ipselector.pack(pady=10)
-        hostbutton.pack(pady=30)
+        hostbutton.pack()
         errorlabel.pack()
         returnbutton.pack()
   

@@ -52,6 +52,8 @@ class tkinterApp(tk.Tk):
   
 class StartPage(tk.Frame):
     def __init__(self, parent, controller): 
+        def changetheme():
+            themebutton.config(text="Theme: Pfdfd")
         tk.Frame.__init__(self, parent)
         title = tk.Label(
             self,
@@ -76,12 +78,13 @@ class StartPage(tk.Frame):
         themebutton = tk.Button(
             self,
             text=f"Theme: {theme}",
+            command=changetheme,
             width=15
         )
         title.pack()
         connectbutton.pack(pady=40)
         hostbutton.pack()
-        #themebutton.pack(pady=10)# Theme button (Feature not complete)
+        themebutton.pack(pady=10)# Theme button (Feature not complete)
 
      
 # second window frame page1 
